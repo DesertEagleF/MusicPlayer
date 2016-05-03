@@ -8,6 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +35,7 @@ import com.deserteaglefe.ninthweek.service.MusicService;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, SensorEventListener {
 
     // 常量系列
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -80,6 +84,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Messenger mMessenger;
     private Messenger mServiceMessenger;
 
+    // 本周新增：传感器
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
+
     // ServiceConnection
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -111,6 +119,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setReceiver();   // 设置广播接收器
         initAnimation(); // 设定动画
         init();          // 初始化数据
+        setSensor();     // 本周新增：传感器
+    }
+
+    private void setSensor() {
+        // (1)获取SensorManager对象
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        // (2)获取Sensor对象
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     }
 
     private void findViews() {
@@ -327,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             mMusicId = 0;
         }
+        Log.i(TAG,"Music ID: " + mMusicId);
         buildSelectMessage(message);
         sendMessageToService(message);
         initSong();
@@ -349,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         message.what = SELECT;
         message.arg1 = mMusicList.get(mMusicId).getResId();
         message.arg2 = mMusicList.get(mMusicId).getAlbumResId();
-        Bundle bundle=new Bundle();
+        Bundle bundle = new Bundle();
         bundle.putString(ITEM_NAME, mMusicList.get(mMusicId).getName());
         message.setData(bundle);
     }
@@ -392,12 +409,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    // 本周新增：注册传感器监听器
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+    }
+
+    // 本周新增：注销传感器监听器
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         stopService(mIntent);
         unregisterReceiver(mMusicBroadcastReceiver);
         unbindService(mServiceConnection);
+    }
+
+    // 本周新增：传感器事件——摇一摇切歌
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float x = event.values[0];
+        float y = event.values[1];
+        float z = event.values[2];
+        if (x > 18 || y > 18 || z > 18) {
+            nextMusic();
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
     // SeekBar - OnSeekBarChangeListener
@@ -433,7 +481,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
             // receive broadcast, handle data
             if (intent != null) {
-                switch (intent.getIntExtra(MusicService.BUTTON_ID, -1)){
+                switch (intent.getIntExtra(MusicService.BUTTON_ID, -1)) {
                     case 0:
                         if (!mIsStart) {
                             playMusic();
