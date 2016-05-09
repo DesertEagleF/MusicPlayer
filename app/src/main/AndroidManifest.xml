@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.deserteaglefe.ninthweek"
+<manifest package="com.deserteaglefe.musicplayer"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
@@ -9,7 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.SplashActivity"
+            android:name="com.deserteaglefe.musicplayer.activity.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -18,14 +18,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.MainActivity"
+            android:name="com.deserteaglefe.musicplayer.activity.MainActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".activity.MusicListActivity"
+            android:name="com.deserteaglefe.musicplayer.activity.MusicListActivity"
             android:screenOrientation="portrait"/>
 
         <receiver
-            android:name=".widget.MusicWidget"
+            android:name="com.deserteaglefe.musicplayer.widget.MusicWidget"
             android:process="com.deserteaglefe.service">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
@@ -35,7 +35,7 @@
                 android:resource="@layout/widget_settings"/>
         </receiver>
         <service
-            android:name=".service.MusicService"
+            android:name="com.deserteaglefe.musicplayer.service.MusicService"
             android:enabled="true"
             android:process="com.deserteaglefe.service"/>
     </application>

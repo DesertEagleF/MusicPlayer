@@ -1,4 +1,4 @@
-package com.deserteaglefe.ninthweek.service;
+package com.deserteaglefe.musicplayer.service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -16,8 +16,8 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.deserteaglefe.ninthweek.R;
-import com.deserteaglefe.ninthweek.activity.MainActivity;
+import com.deserteaglefe.musicplayer.R;
+import com.deserteaglefe.musicplayer.activity.MainActivity;
 
 import java.lang.ref.WeakReference;
 

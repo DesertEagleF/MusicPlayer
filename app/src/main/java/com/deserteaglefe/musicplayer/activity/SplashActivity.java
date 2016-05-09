@@ -1,4 +1,4 @@
-package com.deserteaglefe.ninthweek.activity;
+package com.deserteaglefe.musicplayer.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
-import com.deserteaglefe.ninthweek.R;
+import com.deserteaglefe.musicplayer.R;
 
 /**
  * Created by DesertEagleFe on 2016/4/25.

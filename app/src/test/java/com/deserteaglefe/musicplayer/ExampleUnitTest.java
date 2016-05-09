@@ -1,4 +1,4 @@
-package com.deserteaglefe.ninthweek;
+package com.deserteaglefe.musicplayer;
 
 import org.junit.Test;
 

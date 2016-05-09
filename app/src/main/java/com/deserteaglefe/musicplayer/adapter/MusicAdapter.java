@@ -1,4 +1,4 @@
-package com.deserteaglefe.ninthweek.adapter;
+package com.deserteaglefe.musicplayer.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,8 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.deserteaglefe.ninthweek.MusicItem;
-import com.deserteaglefe.ninthweek.R;
+import com.deserteaglefe.musicplayer.MusicItem;
+import com.deserteaglefe.musicplayer.R;
 
 import java.util.ArrayList;
 

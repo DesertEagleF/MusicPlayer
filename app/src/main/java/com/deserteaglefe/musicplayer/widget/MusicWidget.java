@@ -1,4 +1,4 @@
-package com.deserteaglefe.ninthweek.widget;
+package com.deserteaglefe.musicplayer.widget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -9,8 +9,8 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 
-import com.deserteaglefe.ninthweek.R;
-import com.deserteaglefe.ninthweek.service.MusicService;
+import com.deserteaglefe.musicplayer.R;
+import com.deserteaglefe.musicplayer.service.MusicService;
 
 /**
  * 作为一个播放器，没有widget的话岂不是很无聊？

@@ -1,4 +1,4 @@
-package com.deserteaglefe.ninthweek.activity;
+package com.deserteaglefe.musicplayer.activity;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -28,9 +28,9 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
-import com.deserteaglefe.ninthweek.MusicItem;
-import com.deserteaglefe.ninthweek.R;
-import com.deserteaglefe.ninthweek.service.MusicService;
+import com.deserteaglefe.musicplayer.MusicItem;
+import com.deserteaglefe.musicplayer.R;
+import com.deserteaglefe.musicplayer.service.MusicService;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

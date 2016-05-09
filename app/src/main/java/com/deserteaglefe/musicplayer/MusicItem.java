@@ -1,4 +1,4 @@
-package com.deserteaglefe.ninthweek;
+package com.deserteaglefe.musicplayer;
 
 import android.os.Parcel;
 import android.os.Parcelable;
