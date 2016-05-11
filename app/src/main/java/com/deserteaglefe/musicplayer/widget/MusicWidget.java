@@ -6,6 +6,8 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 
@@ -19,14 +21,21 @@ import com.deserteaglefe.musicplayer.service.MusicService;
 public class MusicWidget extends AppWidgetProvider {
     private RemoteViews mRemoteViews;
     private static int album_id = R.drawable.spectre;
+    private static Bitmap sBitmap = null;
     private static String name = "Spectre";
+    private static String info = "Alan Walker - Spectre";
     private static int play_state = R.drawable.desk_play;
 
     private void setRemoteViews(Context context){
         // RemoteViews部分和Notification的一样，注意Notification在Service中可以直接用this，Widget需要用context
         mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.remote_view);
-        mRemoteViews.setImageViewResource(R.id.remote_album, album_id);
+        if(sBitmap == null){
+            mRemoteViews.setImageViewResource(R.id.remote_album, album_id);
+        } else {
+            mRemoteViews.setImageViewBitmap(R.id.remote_album, sBitmap);
+        }
         mRemoteViews.setTextViewText(R.id.remote_name, name);
+        mRemoteViews.setTextViewText(R.id.remote_info, info);
         mRemoteViews.setImageViewResource(R.id.remote_play, play_state);
         mRemoteViews.setImageViewResource(R.id.remote_prev, R.drawable.desk_pre);
         mRemoteViews.setImageViewResource(R.id.remote_next, R.drawable.desk_next);
@@ -63,10 +72,19 @@ public class MusicWidget extends AppWidgetProvider {
                     mRemoteViews.setImageViewResource(R.id.remote_play, play_state);
                     break;
                 case 2:
-                    album_id = intent.getIntExtra(MusicService.ALBUM_ID, R.drawable.spectre);
+                    byte[] art = intent.getByteArrayExtra(MusicService.ALBUM_EMBEDDED);
+                    sBitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
                     name = intent.getStringExtra(MusicService.NAME);
-                    mRemoteViews.setImageViewResource(R.id.remote_album, album_id);
+                    info = intent.getStringExtra(MusicService.INFO);
+                    if(sBitmap == null){
+                        mRemoteViews.setImageViewResource(R.id.remote_album, album_id);
+                    } else {
+                        mRemoteViews.setImageViewBitmap(R.id.remote_album, sBitmap);
+                    }
                     mRemoteViews.setTextViewText(R.id.remote_name, name);
+                    mRemoteViews.setTextViewText(R.id.remote_info, info);
+                    play_state = R.drawable.desk_pause;
+                    mRemoteViews.setImageViewResource(R.id.remote_play, play_state);
                     break;
 
             }

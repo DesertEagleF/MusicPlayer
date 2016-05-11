@@ -5,6 +5,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.IBinder;
@@ -18,7 +21,9 @@ import android.widget.RemoteViews;
 
 import com.deserteaglefe.musicplayer.R;
 import com.deserteaglefe.musicplayer.activity.MainActivity;
+import com.deserteaglefe.musicplayer.item.MusicItem;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
@@ -30,8 +35,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     // 常量
     public static final String ACTION_BUTTON = "action_button";
     public static final String BUTTON_ID = "button_id";
-    public static final String ALBUM_ID = "album_id";
+    public static final String ALBUM_EMBEDDED = "album_id";
     public static final String NAME = "name";
+    public static final String INFO = "info";
     public static final String WIDGET_UPDATE_ACTION = "android.appwidget.action.APPWIDGET_UPDATE";
     public static final int REMOTE_PLAY_ID = 0;
     public static final int REMOTE_PREV_ID = 1;
@@ -104,6 +110,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.remote_view);
         mRemoteViews.setImageViewResource(R.id.remote_album, R.drawable.spectre);
         mRemoteViews.setTextViewText(R.id.remote_name, "Spectre");
+        mRemoteViews.setTextViewText(R.id.remote_info, "Alan Walker - Spectre");
         if(mIsPlaying){
             mRemoteViews.setImageViewResource(R.id.remote_play, R.drawable.desk_pause);
         }else{
@@ -180,24 +187,43 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         Log.i(MainActivity.TAG,"MediaPlayer Pause");
     }
 
-    public void prepare(int resId, int albumId, String name){
-        Log.i(MainActivity.TAG,"ResId: " + resId);
+    public void prepare(MusicItem musicItem){
         mMediaPlayer.reset(); // 似乎会清掉与OnCompletionListener之间的绑定
-        mMediaPlayer = MediaPlayer.create(this, resId);
-        mDuration = mMediaPlayer.getDuration();
-        mIsPlaying = true;
-        mMediaPlayer.setOnCompletionListener(this); // 那就重新设置
-        mMediaPlayer.start();
-        mRunnable.run();
-        mRemoteViews.setImageViewResource(R.id.remote_album, albumId);
-        mRemoteViews.setTextViewText(R.id.remote_name, name);
-        Intent intent = new Intent();
-        intent.setAction(WIDGET_UPDATE_ACTION);
-        intent.putExtra(BUTTON_ID, 2);
-        intent.putExtra(ALBUM_ID, albumId);
-        intent.putExtra(NAME, name);
-        sendBroadcast(intent);
-        mNotificationManager.notify(notifyId, mNotify);
+        musicItem.setContext(this);
+        String path = musicItem.getPath();
+        try {
+            if(musicItem.isRes()){
+                mMediaPlayer.release();
+                mMediaPlayer = MediaPlayer.create(this, musicItem.getResId());
+            } else {
+                AssetFileDescriptor afd = getAssets().openFd(path);
+                mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                afd.close();
+                mMediaPlayer.prepare();
+            }
+            mDuration = mMediaPlayer.getDuration();
+            mIsPlaying = true;
+            mMediaPlayer.setOnCompletionListener(this); // 那就重新设置
+            mMediaPlayer.start();
+            mRunnable.run();
+            byte[] art = musicItem.getArt();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
+            mRemoteViews.setImageViewBitmap(R.id.remote_album, bitmap);
+            mRemoteViews.setTextViewText(R.id.remote_name, musicItem.getTitle());
+            mRemoteViews.setTextViewText(R.id.remote_info, musicItem.getArtist() + " - " + musicItem.getAlbum());
+            mRemoteViews.setImageViewResource(R.id.remote_play, R.drawable.desk_pause);
+            Intent intent = new Intent();
+            intent.setAction(WIDGET_UPDATE_ACTION);
+            intent.putExtra(BUTTON_ID, 2);
+            intent.putExtra(ALBUM_EMBEDDED, art);
+            intent.putExtra(NAME, musicItem.getTitle());
+            intent.putExtra(INFO, musicItem.getArtist() + " - " + musicItem.getAlbum());
+            sendBroadcast(intent);
+            mNotificationManager.notify(notifyId, mNotify);
+        } catch (IOException e) {
+            Log.i(MainActivity.TAG,"File Open Error");
+            e.printStackTrace();
+        }
     }
 
     public void setProgress(int progress) {
@@ -247,7 +273,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                     musicService.pause();
                     break;
                 case MainActivity.SELECT:
-                    musicService.prepare(msg.arg1, msg.arg2, msg.getData().getString(MainActivity.ITEM_NAME));
+                    msg.getData().setClassLoader(getClass().getClassLoader());
+                    musicService.prepare((MusicItem) msg.getData().getParcelable(MainActivity.ITEM_NAME));
                     break;
                 case MainActivity.SEEKING:
                     musicService.setSeeking();

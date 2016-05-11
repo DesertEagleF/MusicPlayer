@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.deserteaglefe.musicplayer.MusicItem;
+import com.deserteaglefe.musicplayer.item.MusicItem;
 import com.deserteaglefe.musicplayer.R;
 import com.deserteaglefe.musicplayer.adapter.MusicAdapter;
 

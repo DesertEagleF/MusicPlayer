@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -28,8 +30,8 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
-import com.deserteaglefe.musicplayer.MusicItem;
 import com.deserteaglefe.musicplayer.R;
+import com.deserteaglefe.musicplayer.item.MusicItem;
 import com.deserteaglefe.musicplayer.service.MusicService;
 
 import java.lang.ref.WeakReference;
@@ -87,6 +89,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // 本周新增：传感器
     private SensorManager mSensorManager;
     private Sensor mSensor;
+    private boolean mIsActive = true;
+    private boolean mIsSensorReady = false;
+
 
     // ServiceConnection
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -152,10 +157,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void init() {
         // 以下均可以替换成读取SharedPreferences或者查询数据库、解析json等形式……我懒
         mMusicId = 0;
-        mMusicList.add(new MusicItem("Spectre", R.raw.spectre, R.drawable.spectre, true));
-        mMusicList.add(new MusicItem("False King", R.raw.false_king, R.drawable.invincible, false));
-        mMusicList.add(new MusicItem("Breath and Life", R.raw.bal, R.drawable.platinum, false));
-        mMusicList.add(new MusicItem("Immortal", R.raw.immortal, R.drawable.illusions, false));
+        mMusicList.add(new MusicItem(R.raw.spectre, this));
+        mMusicList.add(new MusicItem(R.raw.false_king, this));
+        mMusicList.add(new MusicItem(R.raw.bal, this));
+        mMusicList.add(new MusicItem(R.raw.immortal, this));
+        mMusicList.add(new MusicItem(R.raw.oblivion, this));
         initSong();
     }
 
@@ -170,9 +176,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!mIsFirstPlay) {
             stopDiscAnimation();
         }
-        int resId = mMusicList.get(mMusicId).getAlbumResId();
-        mCoverImage.setImageResource(resId);
-        mCoverImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+        byte[] art = mMusicList.get(mMusicId).getArt();
+        Bitmap bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
+        mCoverImage.setImageBitmap(bitmap);
+        mCoverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
         mCoverImage.postInvalidate();
         mPlayDiscImage.setVisibility(View.VISIBLE);
     }
@@ -343,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             mMusicId = 0;
         }
-        Log.i(TAG,"Music ID: " + mMusicId);
+        Log.i(TAG, "Music ID: " + mMusicId);
         buildSelectMessage(message);
         sendMessageToService(message);
         initSong();
@@ -364,10 +372,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // 通过 上一曲/下一曲/列表 选择音乐，创建一个需要向Service发送的消息
     private void buildSelectMessage(Message message) {
         message.what = SELECT;
-        message.arg1 = mMusicList.get(mMusicId).getResId();
-        message.arg2 = mMusicList.get(mMusicId).getAlbumResId();
         Bundle bundle = new Bundle();
-        bundle.putString(ITEM_NAME, mMusicList.get(mMusicId).getName());
+        bundle.putParcelable(ITEM_NAME, mMusicList.get(mMusicId));
         message.setData(bundle);
     }
 
@@ -413,7 +419,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
+        mIsActive = true;
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mIsSensorReady = true;
 
     }
 
@@ -421,7 +429,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onPause() {
         super.onPause();
+        mIsActive = false;
         mSensorManager.unregisterListener(this);
+        mIsSensorReady = false;
     }
 
     @Override
@@ -440,6 +450,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         float z = event.values[2];
         if (x > 18 || y > 18 || z > 18) {
             nextMusic();
+            mSensorManager.unregisterListener(this);
+            mIsSensorReady = false;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        if(mIsActive && !mIsSensorReady){
+                            mSensorManager.registerListener(MainActivity.this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                            mIsSensorReady = true;
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).run();
         }
     }
 

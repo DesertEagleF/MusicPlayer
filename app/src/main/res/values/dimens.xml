@@ -8,5 +8,5 @@
     <dimen name="button_horizon_margin">16dp</dimen>
     <dimen name="title_size">24sp</dimen>
     <dimen name="remote_button_size">48dp</dimen>
-    <dimen name="remote_margin">36dp</dimen>
+    <dimen name="remote_margin">20dp</dimen>
 </resources>
