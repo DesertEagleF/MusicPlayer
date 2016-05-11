@@ -51,6 +51,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private static final int MAX = 500;
     private static boolean mIsPlaying = false;
     private static boolean mIsComplete = false;
+    private boolean mIsRes = false;
 
     // 消息相关
     private IncomingHandler mIncomingHandler = new IncomingHandler(this);
@@ -97,6 +98,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         mMediaPlayer = MediaPlayer.create(this, R.raw.spectre);
         mMediaPlayer.setOnCompletionListener(this);
         mDuration = mMediaPlayer.getDuration();
+        mIsRes = true;
     }
     /**
      * notification
@@ -188,14 +190,19 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     public void prepare(MusicItem musicItem){
-        mMediaPlayer.reset(); // 似乎会清掉与OnCompletionListener之间的绑定
-        musicItem.setContext(this);
-        String path = musicItem.getPath();
+        if(mIsRes){
+            mMediaPlayer.release();
+        }else{
+            mMediaPlayer.reset(); // 似乎会清掉与OnCompletionListener之间的绑定
+        }
+
+        mIsRes = musicItem.isRes();
         try {
-            if(musicItem.isRes()){
-                mMediaPlayer.release();
+            if(mIsRes){
+                musicItem.setContext(this);
                 mMediaPlayer = MediaPlayer.create(this, musicItem.getResId());
             } else {
+                String path = musicItem.getPath();
                 AssetFileDescriptor afd = getAssets().openFd(path);
                 mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                 afd.close();

@@ -12,26 +12,26 @@
     android:background="@color/grey">
 
     <ImageView
-        android:id="@+id/disk_play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/placeholder_disk_play_program"
-        android:layout_marginTop="64dp"
-        android:layout_centerHorizontal="true"/>
-
-    <ImageView
-        android:id="@+id/cover"
-        android:layout_width="185dp"
-        android:layout_height="185dp"
-        android:layout_marginTop="104dp"
+        android:layout_marginTop="63dp"
+        android:src="@drawable/play_disc_halo"
         android:scaleType="centerCrop"
         android:layout_centerHorizontal="true"/>
 
     <ImageView
-        android:layout_width="185dp"
-        android:layout_height="185dp"
-        android:layout_marginTop="104dp"
-        android:src="@drawable/play_disc_halo"
+        android:id="@+id/disk_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/placeholder_disk_play_program"
+        android:layout_marginTop="66dp"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageView
+        android:id="@+id/cover"
+        android:layout_width="184dp"
+        android:layout_height="184dp"
+        android:layout_marginTop="106dp"
         android:scaleType="centerCrop"
         android:layout_centerHorizontal="true"/>
 
@@ -40,7 +40,7 @@
         android:src="@drawable/play_disc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="63dp"
+        android:layout_marginTop="64dp"
         android:layout_centerHorizontal="true"
         android:visibility="invisible"/>
 
