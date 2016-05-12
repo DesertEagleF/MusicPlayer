@@ -37,6 +37,11 @@ import com.deserteaglefe.musicplayer.service.MusicService;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+/**
+ * the Main UI
+ * Created by DesertEagleFe on 2016/4/27.
+ */
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, SensorEventListener {
 
     // 常量系列
